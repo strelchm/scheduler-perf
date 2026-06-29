@@ -1,3 +1,29 @@
 spring:
   application:
     name: scheduler-perf
+  datasource:
+    jdbc-url: jdbc:postgresql://localhost:6432/x
+    username: x
+    password: x
+    driver-class-name: org.postgresql.Driver
+
+db-scheduler:
+  enabled: true
+  heartbeat-interval: 5m
+  missed-heartbeats-limit: 6
+  polling-interval: 10s
+  table-name: scheduled_tasks
+  immediate-execution-enabled: false
+  scheduler-name:
+  threads: 10
+  priority-enabled: false
+
+  delay-startup-until-context-ready: false
+  polling-strategy: lock-and-fetch
+  polling-strategy-lower-limit-fraction-of-threads: 0.5
+  polling-strategy-upper-limit-fraction-of-threads: 3.0
+  shutdown-max-wait: 30m
+
+logging:
+  level:
+    com.github.kagkarlsson.scheduler: DEBUG

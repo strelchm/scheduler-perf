@@ -19,7 +19,15 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+
+    // db
 	runtimeOnly 'org.postgresql:postgresql'
+//    implementation 'org.springframework.boot:spring-boot-starter-liquibase'
+    implementation 'com.zaxxer:HikariCP:7.1.0'
+
+    // schedulers
+    implementation 'com.github.kagkarlsson:db-scheduler-spring-boot-4-starter:16.11.0'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
