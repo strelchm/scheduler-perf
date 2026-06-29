@@ -27,6 +27,7 @@ dependencies {
 
     // schedulers
     implementation 'com.github.kagkarlsson:db-scheduler-spring-boot-4-starter:16.11.0'
+    implementation  'org.jobrunr:jobrunr-spring-boot-4-starter:8.5.0'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

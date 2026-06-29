@@ -2,19 +2,15 @@ spring:
   application:
     name: scheduler-perf
   datasource:
-    jdbc-url: jdbc:postgresql://localhost:6432/x
-    username: x
-    password: x
+    jdbc-url: jdbc:postgresql://localhost:6432/airdefence_auth
+    username: airdefence
+    password: airdefence
     driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
 
-logging:
-  level:
-    com.github.kagkarlsson.scheduler: DEBUG
-
-db-scheduler:
-  enabled: false
 jobrunr:
   background-job-server:
-    enabled: false
+    enabled: true
+db-scheduler:
+  enabled: false
