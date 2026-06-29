@@ -22,7 +22,7 @@ dependencies {
 
     // db
 	runtimeOnly 'org.postgresql:postgresql'
-//    implementation 'org.springframework.boot:spring-boot-starter-liquibase'
+    implementation 'org.springframework.boot:spring-boot-starter-liquibase'
     implementation 'com.zaxxer:HikariCP:7.1.0'
 
     // schedulers
