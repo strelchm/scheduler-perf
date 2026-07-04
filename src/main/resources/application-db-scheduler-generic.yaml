@@ -1,0 +1,2 @@
+db-scheduler:
+  generic-lock-and-fetch: true
