@@ -1,0 +1,32 @@
+version: '3'
+services:
+  postgres-scheduler-perf:
+    image: "postgres:15-alpine"
+    container_name: postgres-scheduler-perf
+    restart: always
+    volumes:
+      - "./pgdata:/var/lib/postgresql/data"
+    healthcheck:
+      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 10s
+      timeout: 5s
+      retries: 5
+#    ports:
+#      - "6432:5432"
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=schedulers
+
+  scheduler-perf-app:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: "scheduler-perf-app"
+    container_name: scheduler-perf-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres-scheduler-perf:
+        condition: service_healthy
+    restart: always

@@ -2,9 +2,9 @@ spring:
   application:
     name: scheduler-perf
   datasource:
-    jdbc-url: jdbc:postgresql://localhost:6432/x
-    username: x
-    password: x
+    jdbc-url: jdbc:postgresql://postgres-scheduler-perf:5432/schedulers
+    username: myuser
+    password: mypassword
     driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
