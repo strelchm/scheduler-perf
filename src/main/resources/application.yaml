@@ -2,12 +2,36 @@ spring:
   application:
     name: scheduler-perf
   datasource:
-    jdbc-url: jdbc:postgresql://localhost:6432/x
-    username: x
-    password: x
+    jdbc-url: jdbc:postgresql://postgres-scheduler-perf:5432/schedulers
+    username: myuser
+    password: mypassword
     driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
+
+management:
+  server:
+    port: 8085
+  endpoints:
+    enabled-by-default: false
+    web:
+      base-path: /actuator
+      path-mapping:
+        prometheus: /metrics
+      exposure:
+        include: health, info, prometheus
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
+    info:
+      enabled: true
+    prometheus:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 logging:
   level:
