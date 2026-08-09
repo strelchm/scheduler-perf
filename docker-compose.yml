@@ -18,6 +18,38 @@ services:
       - POSTGRES_PASSWORD=mypassword
       - POSTGRES_DB=schedulers
 
+  prometheus:
+    image: prom/prometheus:latest
+    user: "0"
+    container_name: prometheus
+    ports:
+      - "9091:9090"
+    restart: always
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./docker/prometheus/data:/prometheus
+
+  grafana:
+    image: grafana/grafana-oss:9.5.3
+    container_name: grafana
+    user: "0"
+    depends_on:
+      - prometheus
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    restart: always
+    volumes:
+      - ./docker/grafana/grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+
   scheduler-perf-app:
     build:
       context: ./
@@ -26,7 +58,11 @@ services:
     container_name: scheduler-perf-app
     ports:
       - "8080:8080"
+      - "8086:8085"
+      - "8090:8090"
     depends_on:
       postgres-scheduler-perf:
         condition: service_healthy
     restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=db-scheduler
