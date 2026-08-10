@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+<!--    <changeSet id="1-insert-mass-jobrunr" author="strelchm">-->
+<!--        <comment>Insert 1,000,000 noop JobRunr background jobs for performance testing</comment>-->
+<!--        <sqlFile path="v-1.1/insert-mass-jobrunr.sql" relativeToChangelogFile="true"/>-->
+<!--    </changeSet>-->
+</databaseChangeLog>

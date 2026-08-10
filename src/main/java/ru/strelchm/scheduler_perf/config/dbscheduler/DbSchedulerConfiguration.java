@@ -1,4 +1,4 @@
-package ru.strelchm.scheduler_perf.configurable;
+package ru.strelchm.scheduler_perf.config.dbscheduler;
 
 import com.github.kagkarlsson.scheduler.CurrentlyExecuting;
 import com.github.kagkarlsson.scheduler.boot.autoconfigure.Jackson3Serializer;

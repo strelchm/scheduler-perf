@@ -1,4 +1,4 @@
-package ru.strelchm.scheduler_perf.configurable;
+package ru.strelchm.scheduler_perf.config.jobrunr;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jobrunr.server.configuration.BackgroundJobServerThreadType;
@@ -18,16 +18,16 @@ public class JobrunrConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public BackgroundJobServerWorkerPolicy platformThreadsWorkerPolicy(
-            @Value("${jobrunr.worker-count:#{null}}") Integer workerCount) {
+            @Value("${jobrunr.worker-count:#{null}}") Integer workerCount
+    ) {
         int finalWorkerCount = (workerCount != null) ? workerCount :
                 BackgroundJobServerThreadType.PlatformThreads.getDefaultWorkerCount();
-        
-        BackgroundJobServerWorkerPolicy policy = new DefaultBackgroundJobServerWorkerPolicy(
-                finalWorkerCount, 
+
+        log.info("Jobrunr configured with PlatformThreads: workerCount={}", finalWorkerCount);
+
+        return new DefaultBackgroundJobServerWorkerPolicy(
+                finalWorkerCount,
                 BackgroundJobServerThreadType.PlatformThreads
         );
-        
-        log.info("Jobrunr configured with PlatformThreads: workerCount={}", finalWorkerCount);
-        return policy;
     }
 }

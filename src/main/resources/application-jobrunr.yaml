@@ -1,3 +1,9 @@
+spring:
+  liquibase:
+    change-log: classpath:/db/changelog/jobrunr/db.changelog-master.xml
+    database-change-log-lock-table: jobrunr_change_log_lock
+    database-change-log-table: jobrunr_change_log
+
 jobrunr:
   background-job-server:
     enabled: true

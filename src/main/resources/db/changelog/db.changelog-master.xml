@@ -11,4 +11,15 @@
 <!--            <sqlFile path="v-1.0/x-rollback.sql" relativeToChangelogFile="true"/>-->
 <!--        </rollback>-->
     </changeSet>
+    <changeSet id="2-insert-mass-scheduled-tasks" author="strelchm">
+        <comment>Insert 1,000,000 noop scheduled tasks for performance testing</comment>
+        <sqlFile path="v-1.1/insert-mass-scheduled-tasks.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+<!--    <changeSet id="3-insert-mass-jobrunr" author="strelchm">-->
+<!--        <comment>Insert 1,000,000 noop JobRunr background jobs for performance testing</comment>-->
+<!--        <preConditions onFail="WARN" onError="WARN">-->
+<!--            <tableExists tableName="jobrunr_jobs"/>-->
+<!--        </preConditions>-->
+<!--        <sqlFile path="v-1.1/insert-mass-jobrunr.sql" relativeToChangelogFile="true"/>-->
+<!--    </changeSet>-->
 </databaseChangeLog>
