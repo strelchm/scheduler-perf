@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import ru.strelchm.scheduler_perf.config.NoopService;
+import ru.strelchm.scheduler_perf.core.NoopService;
 
 @Slf4j
 @Configuration

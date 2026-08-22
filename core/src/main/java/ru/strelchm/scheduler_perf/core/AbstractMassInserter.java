@@ -1,4 +1,4 @@
-package ru.strelchm.scheduler_perf.service;
+package ru.strelchm.scheduler_perf.core;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;

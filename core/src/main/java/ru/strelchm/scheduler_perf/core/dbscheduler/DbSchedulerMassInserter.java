@@ -1,17 +1,17 @@
-package ru.strelchm.scheduler_perf.service.dbscheduler;
+package ru.strelchm.scheduler_perf.core.dbscheduler;
 
 import com.github.kagkarlsson.scheduler.SchedulerClient;
 import com.github.kagkarlsson.scheduler.task.TaskInstance;
 import io.micrometer.core.instrument.MeterRegistry;
-import ru.strelchm.scheduler_perf.service.AbstractMassInserter;
+import ru.strelchm.scheduler_perf.core.AbstractMassInserter;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ru.strelchm.scheduler_perf.config.dbscheduler.TasksConfiguration.TASK_NAME;
 
 public class DbSchedulerMassInserter extends AbstractMassInserter {
+    public static final String TASK_NAME = "perf_task";
 
     private final SchedulerClient schedulerClient;
 

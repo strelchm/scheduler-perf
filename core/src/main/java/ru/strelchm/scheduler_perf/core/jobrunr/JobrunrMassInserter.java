@@ -1,9 +1,9 @@
-package ru.strelchm.scheduler_perf.service.jobrunr;
+package ru.strelchm.scheduler_perf.core.jobrunr;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import org.jobrunr.scheduling.BackgroundJob;
-import ru.strelchm.scheduler_perf.config.NoopService;
-import ru.strelchm.scheduler_perf.service.AbstractMassInserter;
+import ru.strelchm.scheduler_perf.core.AbstractMassInserter;
+import ru.strelchm.scheduler_perf.core.NoopService;
 
 public class JobrunrMassInserter extends AbstractMassInserter {
 

@@ -1,1 +1,2 @@
 rootProject.name = 'scheduler-perf'
+include "spring-comparison", "core"

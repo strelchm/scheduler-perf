@@ -77,7 +77,7 @@ services:
   scheduler-perf-app:
     build:
       context: ./
-      dockerfile: ./Dockerfile
+      dockerfile: ./spring-comparison/Dockerfile
     image: "scheduler-perf-app"
     container_name: scheduler-perf-app
     ports:

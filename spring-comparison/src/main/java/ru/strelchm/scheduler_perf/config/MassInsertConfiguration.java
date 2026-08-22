@@ -8,11 +8,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import ru.strelchm.scheduler_perf.service.DbCleaner;
-import ru.strelchm.scheduler_perf.service.MassInserter;
-import ru.strelchm.scheduler_perf.service.dbscheduler.DbSchedulerCleaner;
-import ru.strelchm.scheduler_perf.service.dbscheduler.DbSchedulerMassInserter;
-import ru.strelchm.scheduler_perf.service.jobrunr.JobrunrMassInserter;
+import ru.strelchm.scheduler_perf.core.DbCleaner;
+import ru.strelchm.scheduler_perf.core.MassInserter;
+import ru.strelchm.scheduler_perf.core.NoopService;
+import ru.strelchm.scheduler_perf.core.dbscheduler.DbSchedulerCleaner;
+import ru.strelchm.scheduler_perf.core.dbscheduler.DbSchedulerMassInserter;
+import ru.strelchm.scheduler_perf.core.jobrunr.JobrunrMassInserter;
 
 
 @Configuration
@@ -21,11 +22,11 @@ public class MassInsertConfiguration {
     @Bean
     @Profile("jobrunr")
     public MassInserter jobrunrMassInserter(NoopService noopService,
-                                           MeterRegistry meterRegistry,
-                                           @Value("${mass.insert.enabled:true}") boolean enabled,
-                                           @Value("${mass.insert.count:1000}") int count,
-                                           @Value("${mass.insert.batch-size:1000}") int batchSize,
-                                           @Value("${mass.insert.delayMs:0}") long delayMs) {
+                                            MeterRegistry meterRegistry,
+                                            @Value("${mass.insert.enabled:true}") boolean enabled,
+                                            @Value("${mass.insert.count:1000}") int count,
+                                            @Value("${mass.insert.batch-size:1000}") int batchSize,
+                                            @Value("${mass.insert.delayMs:0}") long delayMs) {
         return new JobrunrMassInserter(noopService, meterRegistry, enabled, count, batchSize, delayMs);
     }
 
