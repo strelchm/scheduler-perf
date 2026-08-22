@@ -2,19 +2,26 @@ package ru.strelchm.scheduler_perf.service.dbscheduler;
 
 import com.github.kagkarlsson.scheduler.SchedulerClient;
 import com.github.kagkarlsson.scheduler.task.TaskInstance;
+import io.micrometer.core.instrument.MeterRegistry;
 import ru.strelchm.scheduler_perf.service.AbstractMassInserter;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DbSchedulerMassInserter extends AbstractMassInserter {
+import static ru.strelchm.scheduler_perf.config.dbscheduler.TasksConfiguration.TASK_NAME;
 
-    private static final String TASK_NAME = "perf_task";
+public class DbSchedulerMassInserter extends AbstractMassInserter {
 
     private final SchedulerClient schedulerClient;
 
-    public DbSchedulerMassInserter(SchedulerClient schedulerClient) {
+    public DbSchedulerMassInserter(SchedulerClient schedulerClient,
+                                  MeterRegistry meterRegistry,
+                                  boolean enabled,
+                                  int count,
+                                  int batchSize,
+                                  long delayMs) {
+        super(meterRegistry, enabled, count, batchSize, delayMs);
         this.schedulerClient = schedulerClient;
     }
 

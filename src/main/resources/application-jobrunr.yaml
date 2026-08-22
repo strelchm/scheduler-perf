@@ -6,6 +6,8 @@ spring:
 
 jobrunr:
   background-job-server:
+    poll-interval-in-seconds: 10
+    worker-count: 10
     enabled: true
   jobs:
     metrics:

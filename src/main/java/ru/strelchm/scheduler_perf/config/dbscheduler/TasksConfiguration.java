@@ -12,10 +12,11 @@ import ru.strelchm.scheduler_perf.config.NoopService;
 @Configuration
 @Profile("db-scheduler")
 public class TasksConfiguration {
+    public static final String TASK_NAME = "perf_task";
 
-        @Bean
+    @Bean
         public OneTimeTask<Void> oneTimeTask(NoopService noopService) {
-            return Tasks.oneTime("perf_task")
+            return Tasks.oneTime(TASK_NAME)
                     .execute((taskInstance, executionContext) -> {
                         noopService.noop(taskInstance.getTaskName());
                     });

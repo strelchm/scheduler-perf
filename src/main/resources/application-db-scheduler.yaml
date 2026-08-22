@@ -15,7 +15,7 @@ db-scheduler:
   threads: 10
   priority-enabled: false
 
-  delay-startup-until-context-ready: false
+  delay-startup-until-context-ready: true #  4 db cleaning waiting
   polling-strategy: lock-and-fetch
   polling-strategy-lower-limit-fraction-of-threads: 0.5
   polling-strategy-upper-limit-fraction-of-threads: 3.0
@@ -24,3 +24,7 @@ db-scheduler:
 jobrunr:
   background-job-server:
     enabled: false
+
+#logging:
+#  level:
+#    com.github.kagkarlsson.scheduler: DEBUG

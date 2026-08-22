@@ -18,7 +18,7 @@ public class JobrunrConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public BackgroundJobServerWorkerPolicy platformThreadsWorkerPolicy(
-            @Value("${jobrunr.worker-count:#{null}}") Integer workerCount
+            @Value("${jobrunr.background-job-server.worker-count:#{null}}") Integer workerCount
     ) {
         int finalWorkerCount = (workerCount != null) ? workerCount :
                 BackgroundJobServerThreadType.PlatformThreads.getDefaultWorkerCount();

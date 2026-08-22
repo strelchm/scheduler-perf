@@ -31,12 +31,14 @@ management:
       export:
         enabled: true
 
-logging:
-  level:
-    com.github.kagkarlsson.scheduler: DEBUG
-
 db-scheduler:
   enabled: false
 jobrunr:
   background-job-server:
     enabled: false
+
+mass:
+  insert:
+    enabled: true
+    count: 100_000
+    batch-size: 100_000

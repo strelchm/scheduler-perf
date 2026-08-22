@@ -1,24 +1,33 @@
 package ru.strelchm.scheduler_perf.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 public abstract class AbstractMassInserter implements MassInserter {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractMassInserter.class);
+    private static final String METRIC_NAME = "scheduler.mass.insert.duration";
 
-    @Value("${mass.insert.enabled:true}")
-    private boolean enabled;
+    private final MeterRegistry meterRegistry;
+    private final boolean enabled;
+    private final int count;
+    private final int batchSize;
+    private final long delayMs;
+    private final Timer timer;
 
-    @Value("${mass.insert.count:1000}")
-    private int count;
-
-    @Value("${mass.insert.batch-size:1000}")
-    private int batchSize;
-
-    @Value("${mass.insert.delayMs:0}")
-    private long delayMs;
+    protected AbstractMassInserter(MeterRegistry meterRegistry, boolean enabled, int count, int batchSize, long delayMs) {
+        this.meterRegistry = meterRegistry;
+        this.enabled = enabled;
+        this.count = count;
+        this.batchSize = batchSize;
+        this.delayMs = delayMs;
+        this.timer = Timer.builder(METRIC_NAME)
+                .description("Duration of processing all records for a single library")
+                .tag("library", getSchedulerName())
+                .register(meterRegistry);
+    }
 
     public final void batchInsert() {
         if (!enabled) {
@@ -33,24 +42,30 @@ public abstract class AbstractMassInserter implements MassInserter {
 
         log.info("mass.insert.enabled=true — inserting {} {} tasks (batchSize={}, delay={} ms)", count, getSchedulerName(), batchSize, delayMs);
 
-        int inserted = 0;
-        while (inserted < count) {
-            int currentBatchSize = Math.min(batchSize, count - inserted);
-            insertBatch(inserted, currentBatchSize);
-            inserted += currentBatchSize;
+        Timer.Sample sample = Timer.start(meterRegistry);
 
-            if (delayMs > 0 && inserted < count) {
-                try {
-                    Thread.sleep(delayMs);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
+        int inserted = 0;
+        try {
+            while (inserted < count) {
+                int currentBatchSize = Math.min(batchSize, count - inserted);
+                insertBatch(inserted, currentBatchSize);
+                inserted += currentBatchSize;
+
+                if (delayMs > 0 && inserted < count) {
+                    try {
+                        Thread.sleep(delayMs);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+
+                if (inserted % Math.max(1, batchSize * 10) == 0 || inserted == count) {
+                    log.info("inserted {} / {} {} tasks", inserted, count, getSchedulerName());
                 }
             }
-
-            if (inserted % Math.max(1, batchSize * 10) == 0 || inserted == count) {
-                log.info("inserted {} / {} {} tasks", inserted, count, getSchedulerName());
-            }
+        } finally {
+            sample.stop(timer);
         }
 
         log.info("finished inserting {} {} tasks", inserted, getSchedulerName());
