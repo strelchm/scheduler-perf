@@ -1,0 +1,16 @@
+spring:
+  liquibase:
+    change-log: classpath:/db/changelog/jobrunr/db.changelog-master.xml
+    database-change-log-lock-table: jobrunr_change_log_lock
+    database-change-log-table: jobrunr_change_log
+
+jobrunr:
+  background-job-server:
+    poll-interval-in-seconds: 10
+    worker-count: 10
+    enabled: true
+  jobs:
+    metrics:
+      enabled: true
+db-scheduler:
+  enabled: false

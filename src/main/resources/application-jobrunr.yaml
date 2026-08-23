@@ -1,8 +1,0 @@
-jobrunr:
-  background-job-server:
-    enabled: true
-  jobs:
-    metrics:
-      enabled: true
-db-scheduler:
-  enabled: false

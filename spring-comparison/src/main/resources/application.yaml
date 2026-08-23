@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: scheduler-perf
+  datasource:
+    jdbc-url: jdbc:postgresql://postgres-scheduler-perf:5432/schedulers
+    username: myuser
+    password: mypassword
+    driver-class-name: org.postgresql.Driver
+
+management:
+  server:
+    port: 8085
+  endpoints:
+    enabled-by-default: false
+    web:
+      base-path: /actuator
+      path-mapping:
+        prometheus: /metrics
+      exposure:
+        include: health, info, prometheus
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
+    info:
+      enabled: true
+    prometheus:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+db-scheduler:
+  enabled: false
+jobrunr:
+  background-job-server:
+    enabled: false
+
+mass:
+  insert:
+    enabled: true
+    count: 100_000
+    batch-size: 100_000

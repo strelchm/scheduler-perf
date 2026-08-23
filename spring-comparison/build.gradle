@@ -1,0 +1,23 @@
+plugins {
+	id 'org.springframework.boot' version '4.1.0'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+dependencies {
+    implementation project(":core")
+
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+
+    // db
+    implementation 'org.springframework.boot:spring-boot-starter-liquibase'
+
+    // schedulers
+    implementation 'com.github.kagkarlsson:db-scheduler-spring-boot-4-starter:16.11.0'
+    implementation  'org.jobrunr:jobrunr-spring-boot-4-starter:8.5.0'
+
+    // metrics
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // testing
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

@@ -1,0 +1,30 @@
+spring:
+  liquibase:
+    change-log: classpath:/db/changelog/db-scheduler/db.changelog-master.xml
+    database-change-log-lock-table: db_scheduler_change_log_lock
+    database-change-log-table: db_scheduler_change_log
+
+db-scheduler:
+  enabled: true
+  heartbeat-interval: 5m
+  missed-heartbeats-limit: 6
+  polling-interval: 10s
+  table-name: scheduled_tasks
+  immediate-execution-enabled: false
+  scheduler-name:
+  threads: 10
+  priority-enabled: false
+
+  delay-startup-until-context-ready: true #  4 db cleaning waiting
+  polling-strategy: lock-and-fetch
+  polling-strategy-lower-limit-fraction-of-threads: 0.5
+  polling-strategy-upper-limit-fraction-of-threads: 3.0
+  shutdown-max-wait: 30m
+
+jobrunr:
+  background-job-server:
+    enabled: false
+
+#logging:
+#  level:
+#    com.github.kagkarlsson.scheduler: DEBUG

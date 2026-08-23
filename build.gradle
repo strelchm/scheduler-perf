@@ -1,50 +1,46 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.1.0'
-	id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'ru.strelchm'
 version = '0.0.1-SNAPSHOT'
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(25)
-	}
-}
+subprojects {
+    apply plugin: 'java'
 
-repositories {
-	mavenCentral()
-}
+    dependencies {
+        // db
+        runtimeOnly 'org.postgresql:postgresql'
+        implementation 'com.zaxxer:HikariCP:7.1.0'
 
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+        // schedulers
+        implementation 'com.github.kagkarlsson:db-scheduler:16.11.0'
+        implementation 'org.jobrunr:jobrunr:8.8.2'
 
-    // db
-	runtimeOnly 'org.postgresql:postgresql'
-    implementation 'org.springframework.boot:spring-boot-starter-liquibase'
-    implementation 'com.zaxxer:HikariCP:7.1.0'
+        // metrics
+        implementation platform('io.micrometer:micrometer-bom:1.17.1')
+        implementation 'io.micrometer:micrometer-registry-prometheus'
+        // lombok
+        compileOnly 'org.projectlombok:lombok:1.18.46'
+        annotationProcessor 'org.projectlombok:lombok:1.18.46'
+        testCompileOnly 'org.projectlombok:lombok:1.18.46'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.46'
 
-    // schedulers
-    implementation 'com.github.kagkarlsson:db-scheduler-spring-boot-4-starter:16.11.0'
-    implementation  'org.jobrunr:jobrunr-spring-boot-4-starter:8.5.0'
+        // testing
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
 
-    // metrics
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    repositories {
+        mavenCentral()
+    }
 
-    // lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-    testCompileOnly 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.projectlombok:lombok'
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
 
-    // testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
 }
