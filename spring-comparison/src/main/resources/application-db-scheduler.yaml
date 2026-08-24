@@ -12,7 +12,7 @@ db-scheduler:
   table-name: scheduled_tasks
   immediate-execution-enabled: false
   scheduler-name:
-  threads: 10
+  threads: ${DB_SCHEDULER_THREADS:10}
   priority-enabled: false
 
   delay-startup-until-context-ready: true #  4 db cleaning waiting

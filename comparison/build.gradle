@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+dependencies {
+    implementation project(":core")
+
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.2")
+
+    implementation 'ch.qos.logback:logback-classic:1.5.18'
+    implementation 'org.slf4j:slf4j-simple:2.0.17'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+application {
+    mainClass = 'ru.strelchm.scheduler_perf.comparison.ComparisonApplication'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'ru.strelchm.scheduler_perf.comparison.ComparisonApplication'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

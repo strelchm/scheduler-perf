@@ -1,0 +1,40 @@
+name: scheduler-perf
+
+services:
+  console-app:
+    build:
+      context: ./
+      dockerfile: ./comparison/Dockerfile
+      args:
+        scheduler_type: ${CONSOLE_SCHEDULER_TYPE:-db-scheduler}
+    image: "scheduler-perf-console"
+    container_name: scheduler-perf-console
+    ports:
+      - "8081:8080"
+      - "8087:8085"
+    depends_on:
+      postgres-scheduler-perf:
+        condition: service_healthy
+    restart: always
+    environment:
+      - SCHEDULER_TYPE=${CONSOLE_SCHEDULER_TYPE:-db-scheduler}
+      - MASS_INSERT_COUNT=${MASS_INSERT_COUNT:-1000}
+      - MASS_INSERT_BATCH_SIZE=${MASS_INSERT_BATCH_SIZE:-1000}
+      - MASS_INSERT_DELAY_MS=${MASS_INSERT_DELAY_MS:-0}
+      - JOB_RUNR_WORKER_COUNT=${JOB_RUNR_WORKER_COUNT:-4}
+      - JVM_ARGS=-Xms256m -Xmx512m -XX:+UseG1GC
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 768M
+        reservations:
+          cpus: '1.0'
+          memory: 512M
+    networks:
+      - scheduler-net
+
+networks:
+  scheduler-net:
+    name: scheduler-perf_scheduler-net
+    external: true

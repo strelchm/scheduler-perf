@@ -1,0 +1,15 @@
+FROM gradle:9.5.1-jdk21 AS builder
+WORKDIR /app/spring-comparison
+COPY spring-comparison /app/spring-comparison
+COPY core /app/core
+COPY build.gradle /app/build.gradle
+COPY settings-spring.gradle /app/settings.gradle
+RUN gradle jar --no-daemon --no-build-cache
+
+FROM openjdk:27-ea-29-jdk-slim-trixie
+COPY --from=builder /app/spring-comparison/build/libs/spring-comparison.jar /app/
+WORKDIR /app
+ARG deployenv=db-scheduler
+ENV SPRING_PROFILES_ACTIVE $deployenv
+ENV JVM_ARGS=""
+ENTRYPOINT ["sh", "-c", "java $JVM_ARGS -jar spring-comparison.jar"]

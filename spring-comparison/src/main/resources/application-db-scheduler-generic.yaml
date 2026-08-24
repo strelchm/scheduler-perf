@@ -1,2 +1,3 @@
 db-scheduler:
   generic-lock-and-fetch: true
+  poll-interval: 10s
