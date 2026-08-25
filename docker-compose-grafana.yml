@@ -1,0 +1,25 @@
+name: scheduler-perf
+
+services:
+  grafana:
+    image: grafana/grafana-oss:9.5.3
+    user: "0"
+    depends_on:
+      - prometheus
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    restart: always
+    volumes:
+      - ./docker/grafana/grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - scheduler-net
+
+networks:
+  scheduler-net:
+    name: scheduler-perf_scheduler-net
+    external: true

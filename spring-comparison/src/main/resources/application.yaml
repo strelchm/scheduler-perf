@@ -6,6 +6,13 @@ spring:
     username: myuser
     password: mypassword
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 0
 
 management:
   server:
@@ -40,5 +47,6 @@ jobrunr:
 mass:
   insert:
     enabled: true
-    count: 100_000
-    batch-size: 100_000
+    count: ${MASS_INSERT_COUNT:1000}
+    batch-size: ${MASS_INSERT_BATCH_SIZE:1000}
+    delayMs: ${MASS_INSERT_DELAY_MS:0}

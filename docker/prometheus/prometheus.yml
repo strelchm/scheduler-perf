@@ -4,13 +4,21 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'scheduler-perf-app'
+  - job_name: 'scheduler-perf-spring'
     scrape_interval: 15s
     scrape_timeout: 10s
     metrics_path: /actuator/metrics
     static_configs:
       - targets:
-          - scheduler-perf-app:8085
+          - scheduler-perf-spring:8085
+
+  - job_name: 'scheduler-perf-console'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: /actuator/metrics
+    static_configs:
+      - targets:
+          - scheduler-perf-console:8085
 
   - job_name: 'postgres-exporter'
     scrape_interval: 15s

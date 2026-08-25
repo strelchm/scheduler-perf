@@ -7,10 +7,34 @@ spring:
 jobrunr:
   background-job-server:
     poll-interval-in-seconds: 10
-    worker-count: 10
+    worker-count: ${JOB_RUNR_WORKER_COUNT:10}
     enabled: true
+    metrics:
+      enabled: true
   jobs:
     metrics:
       enabled: true
+
+#  jobrunr.jobs.delete-succeeded-jobs-after=36h #succeeded jobs will go to the deleted state after 36 hours
+#  jobrunr.jobs.permanently-delete-deleted-jobs-after=72h #deleted jobs will be deleted permanently after 72 hours
+#  jobrunr.background-job-server.delete-succeeded-jobs-after=36h # DEPRECATED, use jobrunr.jobs.delete-succeeded-jobs-after
+#  jobrunr.background-job-server.permanently-delete-deleted-jobs-after=72h # DEPRECATED, use jobrunr.jobs.permanently-delete-deleted-jobs-after
+#  jobrunr.background-job-server.interrupt-jobs-await-duration-on-stop=10s #how long to wait for running jobs to finish when the server is stopped
+
+
+
+
+
+
+
+
+
+
+
+
+
 db-scheduler:
   enabled: false
+
+
+
