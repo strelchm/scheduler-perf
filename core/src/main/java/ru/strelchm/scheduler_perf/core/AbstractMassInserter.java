@@ -2,12 +2,11 @@ package ru.strelchm.scheduler_perf.core;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class AbstractMassInserter implements MassInserter {
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractMassInserter.class);
     private static final String METRIC_NAME = "scheduler.mass.insert.duration";
 
     private final MeterRegistry meterRegistry;

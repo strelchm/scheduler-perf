@@ -2,8 +2,7 @@ package ru.strelchm.scheduler_perf.comparison;
 
 import com.sun.net.httpserver.HttpServer;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,9 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Slf4j
 public class MetricsServer {
 
-    private static final Logger log = LoggerFactory.getLogger(MetricsServer.class);
     private static final int DEFAULT_PORT = 8085;
 
     private final int port;

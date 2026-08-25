@@ -1,7 +1,7 @@
 name: scheduler-perf
 
 services:
-  console-app:
+  scheduler-perf-console:
     build:
       context: ./
       dockerfile: ./comparison/Dockerfile
@@ -18,11 +18,21 @@ services:
     restart: always
     environment:
       - SCHEDULER_TYPE=${CONSOLE_SCHEDULER_TYPE:-db-scheduler}
+
+      - MASS_INSERT_ENABLED=${MASS_INSERT_ENABLED:-true}
       - MASS_INSERT_COUNT=${MASS_INSERT_COUNT:-1000}
       - MASS_INSERT_BATCH_SIZE=${MASS_INSERT_BATCH_SIZE:-1000}
       - MASS_INSERT_DELAY_MS=${MASS_INSERT_DELAY_MS:-0}
-      - JOB_RUNR_WORKER_COUNT=${JOB_RUNR_WORKER_COUNT:-4}
+
+      - JOB_RUNR_WORKER_COUNT=${JOB_RUNR_WORKER_COUNT:-10}
       - JVM_ARGS=-Xms256m -Xmx512m -XX:+UseG1GC
+
+      - DB_SCHEDULER_THREADS=${DB_SCHEDULER_THREADS:-10}
+      - POLL_INTERVAL_IN_SECONDS=${JOB_RUNR_WORKER_COUNT:-5}
+
+      - DB_URL=jdbc:postgresql://postgres-scheduler-perf:5432/schedulers
+      - DB_USERNAME=myuser
+      - DB_PASSWORD=mypassword
     deploy:
       resources:
         limits:

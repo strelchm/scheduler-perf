@@ -10,6 +10,62 @@ This project compares the performance of two popular Java job scheduling librari
 - **[JobRunr](https://www.jobrunr.io/)** — full-featured scheduler with dashboard and advanced capabilities
 
 Both libraries use PostgreSQL for task persistence, ensuring reliability and scalability.
+Two comparison modes are supported - console and Spring.
+
+## Accurate Comparison
+### Identical Configuration for Fair Comparison
+
+To ensure unbiased performance comparison, both applications use identical infrastructure settings:
+
+| Component           | Setting                                    | Value                                        | Description                         |
+|---------------------|--------------------------------------------|----------------------------------------------|-------------------------------------|
+| **Connection Pool** | HikariCP `maximum-pool-size`               | 10                                           | Max DB connections                  |
+|                     | HikariCP `minimum-idle`                    | 2                                            | Min idle connections                |
+|                     | HikariCP `connection-timeout`              | 30000ms                                      | Connection timeout                  |
+|                     | HikariCP `idle-timeout`                    | 600000ms                                     | Idle connection timeout             |
+|                     | HikariCP `max-lifetime`                    | 1800000ms                                    | Max connection lifetime             |
+|                     | HikariCP `leak-detection-threshold`        | 0                                            | Disabled                            |
+| **Serialization**   | Library                                    | Jackson 3                                    | Same serialization library for both |
+|                     | Serialization features                     | Default                                      | No special features enabled         |
+|                     | Deserialization features                   | Default                                      | No special features enabled         |
+|                     | Date format                                | ISO-8601                                     | Standard date format                |
+| **JVM**             | Initial heap size                          | 256MB                                        | `-Xms256m`                          |
+|                     | Max heap size                              | 512MB                                        | `-Xmx512m`                          |
+|                     | GC                                         | G1GC                                         | Default for Java 25                 |
+| **Database**        | PostgreSQL version                         | 15                                           | Same container for both             |
+|                     | Connection URL                             | `jdbc:postgresql://postgres:5432/schedulers` | Same DB                             |
+| **Scheduler**       | Poll interval                              | 5s                                           | Same for both libraries             |
+|                     | Worker count (thread count in worker pool) | 10                                           | Same for both libraries             |
+
+**Why this matters:**
+
+- Both schedulers compete under identical conditions
+- Differences in performance come from the libraries themselves, not configuration
+- Connection pool settings prevent DB contention from skewing results
+- Same JVM settings ensure fair memory and GC behavior
+- Same poll interval ensures equal polling frequency
+
+### Best Practices for Accurate Comparison
+
+Follow these guidelines to ensure fair and reproducible benchmark results:
+
+1. **Run multiple iterations** — Execute each scenario 3-5 times and calculate average values to account for JVM warmup and system noise
+
+2. **Monitor system resources** — Ensure no other heavy processes are running on the host during benchmarks
+
+3. Both applications have CPU/memory limits set to prevent resource starvation:
+    - CPU: 1.0-2.0 cores
+    - Memory: 512MB-768MB
+
+4. Identical noop tasks are used for both libraries
+
+5. **Database proximity** — Both applications connect to the same PostgreSQL container to eliminate network variance
+
+6. **Serializer consistency** — Both libraries use Jackson for serialization (configured in `DbSchedulerConfiguration.java`)
+
+7. **Lock-and-fetch mode** — db-scheduler uses `generic-lock-and-fetch: true` for PostgreSQL, matching JobRunr's locking strategy
+
+8. **Check for GC pressure** — Monitor `jvm_gc_pause_seconds` metric; high GC can skew results
 
 ## 🏗️ Project Architecture
 
@@ -17,40 +73,13 @@ Both libraries use PostgreSQL for task persistence, ensuring reliability and sca
 scheduler-perf/
 ├── core/                    # Core module (interfaces, base classes)
 │   └── src/main/java/
-│       └── ru/strelchm/scheduler_perf/core/
-│           ├── AbstractMassInserter.java
-│           ├── MassInserter.java
-│           ├── DbCleaner.java
-│           ├── NoopService.java
-│           ├── dbscheduler/
-│           │   ├── DbSchedulerMassInserter.java
-│           │   └── DbSchedulerCleaner.java
-│           └── jobrunr/
-│               └── JobrunrMassInserter.java
-│
+|
 ├── spring-comparison/       # Spring Boot application
 │   └── src/main/java/
 │       └── ru/strelchm/scheduler_perf/
-│           ├── SchedulerPerfApplication.java
-│           └── config/
-│               ├── DataSourceConfiguration.java
-│               ├── MassInsertConfiguration.java
-│               ├── NoopServiceConfig.java
-│               ├── dbscheduler/
-│               │   ├── DbSchedulerConfiguration.java
-│               │   └── TasksConfiguration.java
-│               └── jobrunr/
-│                   └── JobrunrConfiguration.java
 │
 ├── comparison/              # Console application (no Spring)
 │   └── src/main/java/
-│       └── ru/strelchm/scheduler_perf/comparison/
-│           ├── ComparisonApplication.java      # Main entry point
-│           ├── AppConfig.java                  # Configuration loader
-│           ├── DataSourceFactory.java          # HikariCP DataSource creator
-│           ├── MetricsServer.java              # HTTP server for Prometheus metrics
-│           ├── DbSchedulerRunner.java          # db-scheduler execution logic
-│           └── JobRunrRunner.java              # JobRunr execution logic
 │
 ├── docker/                  # Docker configuration
 │   ├── postgres/
@@ -211,61 +240,6 @@ All applications use identical settings for fair comparison:
 | `jobrunr.worker-count` | `4` | Number of JobRunr workers |
 | `db-scheduler.threads` | `10` | Number of db-scheduler threads |
 
-### Identical Configuration for Fair Comparison
-
-To ensure unbiased performance comparison, both applications use identical infrastructure settings:
-
-| Component | Setting | Value | Description |
-|-----------|---------|-------|-------------|
-| **Connection Pool** | HikariCP `maximum-pool-size` | 10 | Max DB connections |
-| | HikariCP `minimum-idle` | 2 | Min idle connections |
-| | HikariCP `connection-timeout` | 30000ms | Connection timeout |
-| | HikariCP `idle-timeout` | 600000ms | Idle connection timeout |
-| | HikariCP `max-lifetime` | 1800000ms | Max connection lifetime |
-| | HikariCP `leak-detection-threshold` | 0 | Disabled |
-| **Thread Pools** | Executor core pool size | 10 | Core thread count |
-| | Executor max pool size | 10 | Max thread count |
-| | Executor queue capacity | 1000 | Task queue size |
-| **Jackson** | Serialization features | Default | No special features enabled |
-| | Deserialization features | Default | No special features enabled |
-| | Date format | ISO-8601 | Standard date format |
-| **JVM** | Initial heap size | 256MB | `-Xms256m` |
-| | Max heap size | 512MB | `-Xmx512m` |
-| | GC | G1GC | Default for Java 25 |
-| **Database** | PostgreSQL version | 15 | Same container for both |
-| | Connection URL | `jdbc:postgresql://postgres:5432/schedulers` | Same DB |
-| **Scheduler** | Poll interval | 10s | Same for both libraries |
-
-**Why this matters:**
-
-- Both schedulers compete under identical conditions
-- Differences in performance come from the libraries themselves, not configuration
-- Connection pool settings prevent DB contention from skewing results
-- Same JVM settings ensure fair memory and GC behavior
-- Same poll interval ensures equal polling frequency
-
-### Best Practices for Accurate Comparison
-
-Follow these guidelines to ensure fair and reproducible benchmark results:
-
-1. **Run multiple iterations** — Execute each scenario 3-5 times and calculate average values to account for JVM warmup and system noise
-
-2. **Monitor system resources** — Ensure no other heavy processes are running on the host during benchmarks
-
-3. Both applications have CPU/memory limits set to prevent resource starvation:
-   - CPU: 1.0-2.0 cores
-   - Memory: 512MB-768MB
- 
-4. Identical noop tasks are used for both libraries
-
-6. **Database proximity** — Both applications connect to the same PostgreSQL container to eliminate network variance
-
-7. **Serializer consistency** — Both libraries use Jackson for serialization (configured in `DbSchedulerConfiguration.java`)
-
-8. **Lock-and-fetch mode** — db-scheduler uses `generic-lock-and-fetch: true` for PostgreSQL, matching JobRunr's locking strategy
-
-6. **Check for GC pressure** — Monitor `jvm_gc_pause_seconds` metric; high GC can skew results
-
 ### Configuration Files
 
 **Console (no Spring):**
@@ -419,15 +393,6 @@ MASS_INSERT_COUNT=100000 MASS_INSERT_BATCH_SIZE=1000 \
    - Behavior with increased workers
    - DB connection contention
 
-### Typical Results
-
-| Scenario | db-scheduler | JobRunr |
-|----------|--------------|---------|
-| Simple tasks | ⚡ Faster | 🐢 Slower |
-| Complex tasks | 🐢 Slower | ⚡ Faster |
-| Memory usage | 📉 Low | 📈 High |
-| Features | 🔧 Basic | 🎛️ Advanced |
-
 ## 🛠️ Troubleshooting
 
 ### DB Connection Errors
@@ -496,20 +461,3 @@ docker-compose -f docker-compose-spring.yml build --no-cache
 docker-compose -f docker-compose-console.yml build --no-cache
 ```
 
-## 📚 Additional Resources
-
-- [db-scheduler Documentation](https://github.com/kagkarlsson/db-scheduler)
-- [JobRunr Documentation](https://www.jobrunr.io/en/documentation/)
-- [Micrometer Documentation](https://micrometer.io/)
-- [Prometheus Documentation](https://prometheus.io/docs/)
-- [Grafana Documentation](https://grafana.com/docs/)
-
-## 📝 License
-
-This project is created for educational and research purposes.
-
-## 🤝 Contributing
-
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
-
----

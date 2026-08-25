@@ -4,8 +4,7 @@ import com.github.kagkarlsson.scheduler.task.helper.OneTimeTask;
 import com.github.kagkarlsson.scheduler.task.helper.Tasks;
 import io.micrometer.prometheusmetrics.PrometheusConfig;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import ru.strelchm.scheduler_perf.comparison.AppConfig.SchedulerType;
 import ru.strelchm.scheduler_perf.comparison.runner.DbSchedulerRunner;
 import ru.strelchm.scheduler_perf.comparison.runner.JobRunrRunner;
@@ -25,13 +24,12 @@ import java.util.concurrent.CountDownLatch;
 
 import static ru.strelchm.scheduler_perf.core.dbscheduler.DbSchedulerMassInserter.TASK_NAME;
 
+@Slf4j
 public class ComparisonApplication {
-
-    private static final Logger log = LoggerFactory.getLogger(ComparisonApplication.class);
 
     public static void main(String[] args) throws Exception {
         AppConfig config = new AppConfig();
-        log.info("Starting comparison application with scheduler type: {}", config.getSchedulerType());
+        log.info("Starting comparison application with scheduler type: {} and config {}", config.getSchedulerType(), config);
 
         final DataSource dataSource = DataSourceFactory.createDataSource(
                 config.getDbUrl(),
@@ -46,15 +44,15 @@ public class ComparisonApplication {
         NoOpService noopService = new NoOpService();
 
         cleanJobs(config.getSchedulerType(), dataSource);
-        insertJobs(config, dataSource, noopService, meterRegistry);
         runScheduler(config, dataSource, meterRegistry, noopService);
+        insertJobs(config, dataSource, noopService, meterRegistry);
 
         new CountDownLatch(1).await();
     }
 
     private static void cleanJobs(SchedulerType schedulerType, DataSource dataSource) {
         DbCleaner dbCleaner = switch (schedulerType) {
-            case DB_SCHEDULLER -> new DbSchedulerCleaner(dataSource);
+            case DB_SCHEDULLER, DB_SCHEDULLER_GENERIC -> new DbSchedulerCleaner(dataSource);
             case JOB_RUNR -> new JobrunrCleaner(dataSource);
         };
         dbCleaner.cleanOldJobs();
@@ -88,13 +86,13 @@ public class ComparisonApplication {
         }
 
         massInserter.batchInsert();
-        log.info("JobRunr mass insert completed");
+        log.info("{} mass insert completed", schedulerType);
     }
 
     private static void runScheduler(AppConfig config, DataSource dataSource, PrometheusMeterRegistry meterRegistry, NoOpService noopService) {
         SchedulerRunner schedulerRunner = switch (config.getSchedulerType()) {
-            case DB_SCHEDULLER -> new DbSchedulerRunner(dataSource, meterRegistry, config, List.of(noOpTask(noopService)));
-            case JOB_RUNR -> new JobRunrRunner(dataSource, meterRegistry, config, noopService);
+            case DB_SCHEDULLER, DB_SCHEDULLER_GENERIC -> new DbSchedulerRunner(dataSource, meterRegistry, config, List.of(noOpTask(noopService)));
+            case JOB_RUNR -> new JobRunrRunner(dataSource, meterRegistry, config);
         };
         schedulerRunner.run();
     }

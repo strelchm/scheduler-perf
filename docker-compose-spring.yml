@@ -1,7 +1,7 @@
 name: scheduler-perf
 
 services:
-  spring-app:
+  scheduler-perf-spring:
     build:
       context: ./
       dockerfile: ./spring-comparison/Dockerfile

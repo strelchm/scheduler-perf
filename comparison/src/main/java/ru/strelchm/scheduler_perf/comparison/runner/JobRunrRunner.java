@@ -1,39 +1,48 @@
 package ru.strelchm.scheduler_perf.comparison.runner;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jobrunr.configuration.JobRunr;
+import org.jobrunr.configuration.JobRunrConfiguration.JobRunrConfigurationResult;
+import org.jobrunr.configuration.JobRunrMicroMeterIntegration;
+import org.jobrunr.server.BackgroundJobServerConfiguration;
+import org.jobrunr.server.configuration.BackgroundJobServerThreadType;
+import org.jobrunr.server.configuration.DefaultBackgroundJobServerWorkerPolicy;
 import org.jobrunr.storage.sql.postgres.PostgresStorageProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.strelchm.scheduler_perf.comparison.AppConfig;
-import ru.strelchm.scheduler_perf.core.service.NoOpService;
 
 import javax.sql.DataSource;
 
+@Slf4j
+@RequiredArgsConstructor
 public class JobRunrRunner implements SchedulerRunner {
-
-    private static final Logger log = LoggerFactory.getLogger(JobRunrRunner.class);
 
     private final DataSource dataSource;
     private final MeterRegistry meterRegistry;
     private final AppConfig config;
-    private final NoOpService noopService;
-
-    public JobRunrRunner(DataSource dataSource, MeterRegistry meterRegistry,
-                         AppConfig config, NoOpService noopService) {
-        this.dataSource = dataSource;
-        this.meterRegistry = meterRegistry;
-        this.config = config;
-        this.noopService = noopService;
-    }
 
     @Override
     public void run() {
-        log.info("Starting JobRunr with worker count: {}", config.getJobRunrWorkerCount());
+        int jobrunrWorkerCount = config.getJobrunrWorkerCount();
+        int pollIntervalInSeconds = config.getPollIntervalInSeconds();
+        log.info("Starting JobRunr with worker count: {}", jobrunrWorkerCount);
 
-        JobRunr.configure()
-                .useStorageProvider(new PostgresStorageProvider(dataSource, "jobrunr"))
-                .useBackgroundJobServer(config.getJobRunrWorkerCount())
+        PostgresStorageProvider storageProvider = new PostgresStorageProvider(dataSource, "jobrunr");
+        JobRunrConfigurationResult result = JobRunr.configure()
+                .useStorageProvider(storageProvider)
+                .useBackgroundJobServer(jobrunrWorkerCount)
+                .useBackgroundJobServer(
+                        BackgroundJobServerConfiguration.usingStandardBackgroundJobServerConfiguration()
+                                .andPollIntervalInSeconds(pollIntervalInSeconds)
+                                .andBackgroundJobServerWorkerPolicy(new DefaultBackgroundJobServerWorkerPolicy(
+                                        jobrunrWorkerCount,
+                                        BackgroundJobServerThreadType.PlatformThreads
+                                ))
+                )
                 .initialize();
+
+        JobRunrMicroMeterIntegration jobRunrMicroMeterIntegration = new JobRunrMicroMeterIntegration(meterRegistry);
+        jobRunrMicroMeterIntegration.initialize(storageProvider, result.getBackgroundJobServer());
     }
 }

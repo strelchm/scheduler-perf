@@ -15,8 +15,8 @@ import com.github.kagkarlsson.scheduler.stats.StatsRegistryAdapter;
 import com.github.kagkarlsson.scheduler.task.Task;
 import com.github.kagkarlsson.scheduler.task.schedule.Schedule;
 import io.micrometer.core.instrument.MeterRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.strelchm.scheduler_perf.comparison.AppConfig;
 import ru.strelchm.scheduler_perf.core.dbscheduler.MdcSchedulerListener;
 
@@ -25,37 +25,33 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+@Slf4j
+@RequiredArgsConstructor
 public class DbSchedulerRunner implements SchedulerRunner {
-
-    private static final Logger log = LoggerFactory.getLogger(DbSchedulerRunner.class);
-    private static final Duration POLL_INTERVAL = Duration.ofSeconds(10);
 
     private final DataSource dataSource;
     private final MeterRegistry meterRegistry;
     private final AppConfig config;
     private final List<Task<?>> knownTasks;
 
-    public DbSchedulerRunner(DataSource dataSource, MeterRegistry meterRegistry, AppConfig config, List<Task<?>> knownTasks) {
-        this.dataSource = dataSource;
-        this.meterRegistry = meterRegistry;
-        this.config = config;
-        this.knownTasks = knownTasks;
-    }
-
     @Override
     public void run() {
-        boolean genericLockAndFetch = false;
-        log.info("Starting db-scheduler with poll interval: {}", POLL_INTERVAL);
-        log.info("LockAndFetch is {}", (genericLockAndFetch ? "generic" : "single statement"));
+        boolean genericLockAndFetch = config.getSchedulerType() == AppConfig.SchedulerType.DB_SCHEDULLER_GENERIC;
+        int pollIntervalInSeconds = config.getPollIntervalInSeconds();
 
+        log.info(
+                "Starting db-scheduler with poll interval: {}. LockAndFetch is {}",
+                pollIntervalInSeconds,
+                (genericLockAndFetch ? "generic" : "single statement")
+        );
 
         Scheduler scheduler = Scheduler.create(dataSource, knownTasks)
-                .pollingInterval(POLL_INTERVAL)
+                .pollingInterval(Duration.ofSeconds(pollIntervalInSeconds))
                 .pollUsingLockAndFetch(1.0, 2.0) // todo config
                 .serializer(new JacksonSerializer(getObjectMapper()))
                 .addSchedulerListener(new MdcSchedulerListener())
                 .addSchedulerListener(new StatsRegistryAdapter(new MicrometerStatsRegistry(meterRegistry, knownTasks)))
-                .threads(config.getJobRunrWorkerCount()) // todo
+                .threads(config.getDbSchedulerThreads())
                 .jdbcCustomization(new PostgreSqlJdbcCustomization(genericLockAndFetch, false))
                 .build();
         scheduler.start();
