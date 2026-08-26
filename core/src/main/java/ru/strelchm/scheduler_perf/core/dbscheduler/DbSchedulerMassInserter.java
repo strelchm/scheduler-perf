@@ -23,9 +23,10 @@ public class DbSchedulerMassInserter extends AbstractMassInserter {
                                   MeterRegistry meterRegistry,
                                   boolean enabled,
                                   int count,
+                                  Integer sleepingJobsCount,
                                   int batchSize,
                                   long delayMs) {
-        super(meterRegistry, enabled, count, batchSize, delayMs);
+        super(meterRegistry, enabled, count, sleepingJobsCount, batchSize, delayMs);
         this.schedulerClient = schedulerClient;
     }
 
@@ -34,9 +35,10 @@ public class DbSchedulerMassInserter extends AbstractMassInserter {
                                    MeterRegistry meterRegistry,
                                    boolean enabled,
                                    int count,
+                                   Integer sleepingJobsCount,
                                    int batchSize,
                                    long delayMs) {
-        super(meterRegistry, enabled, count, batchSize, delayMs);
+        super(meterRegistry, enabled, count, sleepingJobsCount, batchSize, delayMs);
         this.schedulerClient =
                 SchedulerClient.Builder
                         .create(dataSource, knownTasks)
@@ -55,6 +57,15 @@ public class DbSchedulerMassInserter extends AbstractMassInserter {
         }
 
         schedulerClient.scheduleBatch(taskInstances, executionTime);
+    }
+
+    @Override
+    protected void insertSleepingJobs(int startIndex, int batchCount, Instant from, Instant to) {
+        for (int i = 0; i < batchCount; i++) {
+            String iteration = SLEEPING_JOB_ID_GENERATOR.apply(startIndex, i);
+            schedulerClient.schedule(new TaskInstance<>(TASK_NAME, iteration, new NoOpDto(iteration)), getInstantBetween(from, to));
+        }
+
     }
 
     @Override

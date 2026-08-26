@@ -29,7 +29,7 @@ public class JobRunrRunner implements SchedulerRunner {
         log.info("Starting JobRunr with worker count: {}", jobrunrWorkerCount);
 
         JobRunrMicroMeterIntegration jobRunrMicroMeterIntegration = new JobRunrMicroMeterIntegration(meterRegistry);
-        PostgresStorageProvider storageProvider = new PostgresStorageProvider(dataSource, "jobrunr");
+        PostgresStorageProvider storageProvider = new PostgresStorageProvider(dataSource, "");
 
         JobRunr.configure()
                 .useStorageProvider(storageProvider)

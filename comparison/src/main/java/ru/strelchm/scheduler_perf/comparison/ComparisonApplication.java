@@ -68,6 +68,7 @@ public class ComparisonApplication {
                     meterRegistry,
                     config.isMassInsertEnabled(),
                     config.getMassInsertCount(),
+                    config.getSleepingJobsCount(),
                     config.getMassInsertBatchSize(),
                     config.getMassInsertDelayMs()
 
@@ -78,6 +79,7 @@ public class ComparisonApplication {
                     meterRegistry,
                     config.isMassInsertEnabled(),
                     config.getMassInsertCount(),
+                    config.getSleepingJobsCount(),
                     config.getMassInsertBatchSize(),
                     config.getMassInsertDelayMs()
             );
@@ -99,8 +101,6 @@ public class ComparisonApplication {
 
     private static OneTimeTask<NoOpDto> noOpTask(NoOpService noopService) {
         return Tasks.oneTime(TASK_NAME, NoOpDto.class)
-                .execute((taskInstance, _) -> {
-                    noopService.noop(taskInstance.getData());
-                });
+                .execute((taskInstance, _) -> noopService.noop(taskInstance.getData()));
     }
 }
