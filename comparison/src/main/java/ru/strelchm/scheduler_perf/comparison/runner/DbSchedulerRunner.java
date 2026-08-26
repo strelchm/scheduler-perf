@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.strelchm.scheduler_perf.comparison.AppConfig;
 import ru.strelchm.scheduler_perf.core.dbscheduler.MdcSchedulerListener;
+import ru.strelchm.scheduler_perf.core.dbscheduler.MicrometerSchedulerListener;
 
 import javax.sql.DataSource;
 import java.time.Duration;
@@ -47,8 +48,9 @@ public class DbSchedulerRunner implements SchedulerRunner {
 
         Scheduler scheduler = Scheduler.create(dataSource, knownTasks)
                 .pollingInterval(Duration.ofSeconds(pollIntervalInSeconds))
-                .pollUsingLockAndFetch(1.0, 2.0) // todo config
+                .pollUsingLockAndFetch(0.5, 3.0) // todo config
                 .serializer(new JacksonSerializer(getObjectMapper()))
+                .addSchedulerListener(new MicrometerSchedulerListener(meterRegistry))
                 .addSchedulerListener(new MdcSchedulerListener())
                 .addSchedulerListener(new StatsRegistryAdapter(new MicrometerStatsRegistry(meterRegistry, knownTasks)))
                 .threads(config.getDbSchedulerThreads())

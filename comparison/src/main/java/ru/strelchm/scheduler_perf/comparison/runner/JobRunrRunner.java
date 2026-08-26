@@ -4,13 +4,13 @@ import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jobrunr.configuration.JobRunr;
-import org.jobrunr.configuration.JobRunrConfiguration.JobRunrConfigurationResult;
 import org.jobrunr.configuration.JobRunrMicroMeterIntegration;
 import org.jobrunr.server.BackgroundJobServerConfiguration;
 import org.jobrunr.server.configuration.BackgroundJobServerThreadType;
 import org.jobrunr.server.configuration.DefaultBackgroundJobServerWorkerPolicy;
 import org.jobrunr.storage.sql.postgres.PostgresStorageProvider;
 import ru.strelchm.scheduler_perf.comparison.AppConfig;
+import ru.strelchm.scheduler_perf.core.jobrunr.MicrometerJobServerFilter;
 
 import javax.sql.DataSource;
 
@@ -28,10 +28,14 @@ public class JobRunrRunner implements SchedulerRunner {
         int pollIntervalInSeconds = config.getPollIntervalInSeconds();
         log.info("Starting JobRunr with worker count: {}", jobrunrWorkerCount);
 
+        JobRunrMicroMeterIntegration jobRunrMicroMeterIntegration = new JobRunrMicroMeterIntegration(meterRegistry);
         PostgresStorageProvider storageProvider = new PostgresStorageProvider(dataSource, "jobrunr");
-        JobRunrConfigurationResult result = JobRunr.configure()
+
+        JobRunr.configure()
                 .useStorageProvider(storageProvider)
                 .useBackgroundJobServer(jobrunrWorkerCount)
+                .useMetrics(jobRunrMicroMeterIntegration)
+                .withJobFilter(new MicrometerJobServerFilter(meterRegistry))
                 .useBackgroundJobServer(
                         BackgroundJobServerConfiguration.usingStandardBackgroundJobServerConfiguration()
                                 .andPollIntervalInSeconds(pollIntervalInSeconds)
@@ -41,8 +45,5 @@ public class JobRunrRunner implements SchedulerRunner {
                                 ))
                 )
                 .initialize();
-
-        JobRunrMicroMeterIntegration jobRunrMicroMeterIntegration = new JobRunrMicroMeterIntegration(meterRegistry);
-        jobRunrMicroMeterIntegration.initialize(storageProvider, result.getBackgroundJobServer());
     }
 }

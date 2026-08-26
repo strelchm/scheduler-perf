@@ -50,9 +50,8 @@ public class DbSchedulerMassInserter extends AbstractMassInserter {
         List<TaskInstance<?>> taskInstances = new ArrayList<>(batchCount);
 
         for (int i = 0; i < batchCount; i++) {
-            int iteration = startIndex + i;
-            String taskId = String.valueOf(iteration);
-            taskInstances.add(new TaskInstance<>(TASK_NAME, taskId, new NoOpDto(iteration)));
+            String iteration = JOB_ID_GENERATOR.apply(startIndex, i);
+            taskInstances.add(new TaskInstance<>(TASK_NAME, iteration, new NoOpDto(iteration)));
         }
 
         schedulerClient.scheduleBatch(taskInstances, executionTime);

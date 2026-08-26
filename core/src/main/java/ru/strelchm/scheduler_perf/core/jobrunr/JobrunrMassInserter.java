@@ -23,7 +23,7 @@ public class JobrunrMassInserter extends AbstractMassInserter {
     @Override
     protected void insertBatch(int startIndex, int batchCount) {
         for (int i = 0; i < batchCount; i++) {
-            int iteration = startIndex + i;
+            String iteration = JOB_ID_GENERATOR.apply(startIndex, i);
             BackgroundJob.enqueue(() -> noopService.noop(new NoOpDto(iteration)));
         }
     }
