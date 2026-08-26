@@ -10,5 +10,5 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NoOpDto {
-    private int iteration;
+    private String iteration;
 }

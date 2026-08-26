@@ -4,10 +4,13 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.function.BiFunction;
+
 @Slf4j
 public abstract class AbstractMassInserter implements MassInserter {
 
     private static final String METRIC_NAME = "scheduler.mass.insert.duration";
+    protected static final BiFunction<Integer, Integer, String> JOB_ID_GENERATOR = "%d___%d"::formatted;
 
     private final MeterRegistry meterRegistry;
     private final boolean enabled;
