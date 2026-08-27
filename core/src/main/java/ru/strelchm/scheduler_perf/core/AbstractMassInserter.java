@@ -59,8 +59,11 @@ public abstract class AbstractMassInserter implements MassInserter {
         }
 
         if (sleepingJobsCount != null) {
+            log.info("mass.insert.enabled=true and sleepingJobsCount is set — inserting {} {} tasks (batchSize={}, delay={} ms)", sleepingJobsCount, getSchedulerName(), batchSize, delayMs);
             insertJobs(sleepingJobsCount, batchSize, true);
         }
+
+        log.info("Massive tasks inserting is finished");
     }
 
     private void insertJobs(int count, int batchSize, boolean sleepingJobs) {
