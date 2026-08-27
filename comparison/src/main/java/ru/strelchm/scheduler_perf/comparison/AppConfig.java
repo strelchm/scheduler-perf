@@ -17,6 +17,7 @@ public class AppConfig {
     private int jobrunrWorkerCount;
     private int dbSchedulerThreads;
     private int pollIntervalInSeconds;
+    private Integer sleepingJobsCount;
 
     private String dbUrl;
     private String dbUsername;
@@ -49,6 +50,7 @@ public class AppConfig {
     private void fillSchedulerPropsFromEnvironment() {
         final String envMassInsertEnabled = System.getenv("MASS_INSERT_ENABLED");
         final String envCount = System.getenv("MASS_INSERT_COUNT");
+        final String envSleepingCount = System.getenv("MASS_INSERT_SLEEPING_COUNT");
         final String envBatchSize = System.getenv("MASS_INSERT_BATCH_SIZE");
         final String envDelayMs = System.getenv("MASS_INSERT_DELAY_MS");
 
@@ -65,6 +67,7 @@ public class AppConfig {
         jobrunrWorkerCount = Integer.parseInt(envJobrunrWorkerCount);
         dbSchedulerThreads = Integer.parseInt(envDbSchedulerThreads);
         pollIntervalInSeconds = Integer.parseInt(envPollIntervalInSeconds);
+        sleepingJobsCount = envSleepingCount == null || envSleepingCount.isEmpty() ? null : Integer.parseInt(envSleepingCount);
     }
 
     public enum SchedulerType {
