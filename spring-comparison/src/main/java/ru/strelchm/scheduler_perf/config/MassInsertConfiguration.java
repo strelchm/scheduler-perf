@@ -36,7 +36,7 @@ public class MassInsertConfiguration {
     }
 
     @Bean
-    @Profile("db-scheduler")
+    @Profile({"db-scheduler", "db-scheduler-generic"})
     public MassInserter dbSchedulerMassInserter(
             SchedulerClient schedulerClient,
             MeterRegistry meterRegistry,
@@ -56,7 +56,7 @@ public class MassInsertConfiguration {
     }
 
     @Bean
-    @Profile("db-scheduler")
+    @Profile({"db-scheduler", "db-scheduler-generic"})
     public DbCleaner dbSchedulerCleaner(DataSource dataSource) {
         return new DbSchedulerCleaner(dataSource);
     }

@@ -1,4 +1,4 @@
-package ru.strelchm.scheduler_perf.comparison;
+package ru.strelchm.scheduler_perf.comparison.config;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -17,6 +17,8 @@ public class AppConfig {
     private int jobrunrWorkerCount;
     private int dbSchedulerThreads;
     private int pollIntervalInSeconds;
+    private double pollUsingLockAndFetchLockAtMostFor;
+    private double pollUsingLockAndFetchLockAtMostForSeconds;
     private Integer sleepingJobsCount;
 
     private String dbUrl;
@@ -62,11 +64,15 @@ public class AppConfig {
         final String envJobrunrWorkerCount = System.getenv("JOB_RUNR_WORKER_COUNT");
         final String envDbSchedulerThreads = System.getenv("DB_SCHEDULER_THREADS");
         final String envPollIntervalInSeconds = System.getenv("POLL_INTERVAL_IN_SECONDS");
+        final String envPollUsingLockAndFetchLockAtMostFor = System.getenv("POLL_USING_LOCK_AND_FETCH_LOCK_AT_MOST_FOR");
+        final String envPollUsingLockAndFetchLockAtMostForSeconds = System.getenv("POLL_USING_LOCK_AND_FETCH_LOCK_AT_MOST_FOR_SECONDS");
         log.info("config {}, {}, {}", envJobrunrWorkerCount, envDbSchedulerThreads, envPollIntervalInSeconds);
 
         jobrunrWorkerCount = Integer.parseInt(envJobrunrWorkerCount);
         dbSchedulerThreads = Integer.parseInt(envDbSchedulerThreads);
         pollIntervalInSeconds = Integer.parseInt(envPollIntervalInSeconds);
+        pollUsingLockAndFetchLockAtMostFor = Double.parseDouble(envPollUsingLockAndFetchLockAtMostFor);
+        pollUsingLockAndFetchLockAtMostForSeconds = Double.parseDouble(envPollUsingLockAndFetchLockAtMostForSeconds);
         sleepingJobsCount = envSleepingCount == null || envSleepingCount.isEmpty() ? null : Integer.parseInt(envSleepingCount);
     }
 

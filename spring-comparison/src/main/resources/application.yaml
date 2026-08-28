@@ -46,7 +46,7 @@ jobrunr:
 
 mass:
   insert:
-    enabled: true
+    enabled: ${MASS_INSERT_ENABLED:true}
     count: ${MASS_INSERT_COUNT:1000}
     sleepingJobsCount: ${MASS_INSERT_SLEEPING_COUNT}
     batch-size: ${MASS_INSERT_BATCH_SIZE:1000}

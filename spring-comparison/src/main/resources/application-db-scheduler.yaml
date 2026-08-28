@@ -8,7 +8,7 @@ db-scheduler:
   enabled: true
   heartbeat-interval: 5m
   missed-heartbeats-limit: 6
-  polling-interval: 10s
+  polling-interval: ${POLL_INTERVAL_IN_SECONDS:5}s
   table-name: scheduled_tasks
   immediate-execution-enabled: false
   scheduler-name:
@@ -17,8 +17,8 @@ db-scheduler:
 
   delay-startup-until-context-ready: true #  4 db cleaning waiting
   polling-strategy: lock-and-fetch
-  polling-strategy-lower-limit-fraction-of-threads: 0.5
-  polling-strategy-upper-limit-fraction-of-threads: 3.0
+  polling-strategy-lower-limit-fraction-of-threads: 0.1
+  polling-strategy-upper-limit-fraction-of-threads: 1.0
   shutdown-max-wait: 30m
 
 jobrunr:

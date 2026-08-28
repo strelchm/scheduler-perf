@@ -5,7 +5,9 @@ import com.github.kagkarlsson.scheduler.task.helper.Tasks;
 import io.micrometer.prometheusmetrics.PrometheusConfig;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import ru.strelchm.scheduler_perf.comparison.AppConfig.SchedulerType;
+import ru.strelchm.scheduler_perf.comparison.config.AppConfig;
+import ru.strelchm.scheduler_perf.comparison.config.AppConfig.SchedulerType;
+import ru.strelchm.scheduler_perf.comparison.metrics.MetricsServer;
 import ru.strelchm.scheduler_perf.comparison.runner.DbSchedulerRunner;
 import ru.strelchm.scheduler_perf.comparison.runner.JobRunrRunner;
 import ru.strelchm.scheduler_perf.comparison.runner.SchedulerRunner;
@@ -44,8 +46,10 @@ public class ComparisonApplication {
         NoOpService noopService = new NoOpService();
 
         cleanJobs(config.getSchedulerType(), dataSource);
-        runScheduler(config, dataSource, meterRegistry, noopService);
+        SchedulerRunner runner = getSchedulerRunner(config, dataSource, meterRegistry, noopService);
+        runner.initialize();
         insertJobs(config, dataSource, noopService, meterRegistry);
+        runner.startBackgroundServer();
 
         new CountDownLatch(1).await();
     }
@@ -59,10 +63,9 @@ public class ComparisonApplication {
     }
 
     private static void insertJobs(AppConfig config, DataSource dataSource, NoOpService noopService, PrometheusMeterRegistry meterRegistry) {
-        MassInserter massInserter;
         SchedulerType schedulerType = config.getSchedulerType();
-        if (schedulerType == SchedulerType.DB_SCHEDULLER) {
-            massInserter = new DbSchedulerMassInserter(
+        MassInserter massInserter = switch (schedulerType) {
+            case DB_SCHEDULLER, DB_SCHEDULLER_GENERIC -> new DbSchedulerMassInserter(
                     dataSource,
                     List.of(noOpTask(noopService)),
                     meterRegistry,
@@ -73,8 +76,7 @@ public class ComparisonApplication {
                     config.getMassInsertDelayMs()
 
             );
-        } else if (schedulerType == SchedulerType.JOB_RUNR) {
-            massInserter = new JobrunrMassInserter(
+            case JOB_RUNR -> new JobrunrMassInserter(
                     noopService,
                     meterRegistry,
                     config.isMassInsertEnabled(),
@@ -83,20 +85,20 @@ public class ComparisonApplication {
                     config.getMassInsertBatchSize(),
                     config.getMassInsertDelayMs()
             );
-        } else {
-            throw new IllegalArgumentException("Unknown scheduler type: " + schedulerType);
-        }
+            case null, default -> throw new IllegalArgumentException("Unknown scheduler type: " + schedulerType);
+        };
 
         massInserter.batchInsert();
         log.info("{} mass insert completed", schedulerType);
     }
 
-    private static void runScheduler(AppConfig config, DataSource dataSource, PrometheusMeterRegistry meterRegistry, NoOpService noopService) {
-        SchedulerRunner schedulerRunner = switch (config.getSchedulerType()) {
-            case DB_SCHEDULLER, DB_SCHEDULLER_GENERIC -> new DbSchedulerRunner(dataSource, meterRegistry, config, List.of(noOpTask(noopService)));
-            case JOB_RUNR -> new JobRunrRunner(dataSource, meterRegistry, config);
+    private static SchedulerRunner getSchedulerRunner(AppConfig config, DataSource dataSource, PrometheusMeterRegistry meterRegistry, NoOpService noopService) {
+        return switch (config.getSchedulerType()) {
+            case DB_SCHEDULLER, DB_SCHEDULLER_GENERIC ->
+                    new DbSchedulerRunner(dataSource, meterRegistry, config, List.of(noOpTask(noopService)));
+            case JOB_RUNR ->
+                    new JobRunrRunner(dataSource, meterRegistry, config);
         };
-        schedulerRunner.run();
     }
 
     private static OneTimeTask<NoOpDto> noOpTask(NoOpService noopService) {
