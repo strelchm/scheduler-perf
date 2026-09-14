@@ -21,6 +21,7 @@ services:
 
       - MASS_INSERT_ENABLED=${MASS_INSERT_ENABLED:-true}
       - MASS_INSERT_COUNT=${MASS_INSERT_COUNT:-1000}
+      - MASS_INSERT_SLEEPING_COUNT=${MASS_INSERT_SLEEPING_COUNT}
       - MASS_INSERT_BATCH_SIZE=${MASS_INSERT_BATCH_SIZE:-1000}
       - MASS_INSERT_DELAY_MS=${MASS_INSERT_DELAY_MS:-0}
 
@@ -28,7 +29,9 @@ services:
       - JVM_ARGS=-Xms256m -Xmx512m -XX:+UseG1GC
 
       - DB_SCHEDULER_THREADS=${DB_SCHEDULER_THREADS:-10}
-      - POLL_INTERVAL_IN_SECONDS=${JOB_RUNR_WORKER_COUNT:-5}
+      - POLL_INTERVAL_IN_SECONDS=${POLL_INTERVAL_IN_SECONDS:-5}
+      - POLL_USING_LOCK_AND_FETCH_LOCK_AT_MOST_FOR=${POLL_USING_LOCK_AND_FETCH_LOCK_AT_MOST_FOR:-0.5}
+      - POLL_USING_LOCK_AND_FETCH_LOCK_AT_MOST_FOR_SECONDS=${POLL_USING_LOCK_AND_FETCH_LOCK_AT_MOST_FOR_SECONDS:-3.0}
 
       - DB_URL=jdbc:postgresql://postgres-scheduler-perf:5432/schedulers
       - DB_USERNAME=myuser
@@ -41,6 +44,8 @@ services:
         reservations:
           cpus: '1.0'
           memory: 512M
+    cpus: 2.0
+    mem_limit: 768m
     networks:
       - scheduler-net
 

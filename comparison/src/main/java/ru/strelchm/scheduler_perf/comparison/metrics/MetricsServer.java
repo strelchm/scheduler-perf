@@ -1,4 +1,4 @@
-package ru.strelchm.scheduler_perf.comparison;
+package ru.strelchm.scheduler_perf.comparison.metrics;
 
 import com.sun.net.httpserver.HttpServer;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;

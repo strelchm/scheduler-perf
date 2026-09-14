@@ -28,23 +28,25 @@ public class MassInsertConfiguration {
             MeterRegistry meterRegistry,
             @Value("${mass.insert.enabled:true}") boolean enabled,
             @Value("${mass.insert.count:1000}") int count,
+            @Value("${mass.insert.sleepingJobsCount}") Integer sleepingJobsCount,
             @Value("${mass.insert.batch-size:1000}") int batchSize,
             @Value("${mass.insert.delayMs:0}") long delayMs
     ) {
-        return new JobrunrMassInserter(noopService, meterRegistry, enabled, count, batchSize, delayMs);
+        return new JobrunrMassInserter(noopService, meterRegistry, enabled, count, sleepingJobsCount, batchSize, delayMs);
     }
 
     @Bean
-    @Profile("db-scheduler")
+    @Profile({"db-scheduler", "db-scheduler-generic"})
     public MassInserter dbSchedulerMassInserter(
             SchedulerClient schedulerClient,
             MeterRegistry meterRegistry,
             @Value("${mass.insert.enabled:true}") boolean enabled,
             @Value("${mass.insert.count:1000}") int count,
+            @Value("${mass.insert.sleepingJobsCount}") Integer sleepingJobsCount,
             @Value("${mass.insert.batch-size:1000}") int batchSize,
             @Value("${mass.insert.delayMs:0}") long delayMs
     ) {
-        return new DbSchedulerMassInserter(schedulerClient, meterRegistry, enabled, count, batchSize, delayMs);
+        return new DbSchedulerMassInserter(schedulerClient, meterRegistry, enabled, count, sleepingJobsCount, batchSize, delayMs);
     }
 
     @Bean
@@ -54,7 +56,7 @@ public class MassInsertConfiguration {
     }
 
     @Bean
-    @Profile("db-scheduler")
+    @Profile({"db-scheduler", "db-scheduler-generic"})
     public DbCleaner dbSchedulerCleaner(DataSource dataSource) {
         return new DbSchedulerCleaner(dataSource);
     }

@@ -222,9 +222,13 @@ docker-compose -f docker-compose-infra.yml \
 | `CONSOLE_SCHEDULER_TYPE` | `db-scheduler` | Console scheduler: `db-scheduler` or `jobrunr` |
 | `MASS_INSERT_COUNT` | `1000` | Number of tasks to insert |
 | `MASS_INSERT_BATCH_SIZE` | `1000` | Batch size for mass insert |
+| `MASS_INSERT_SLEEPING_COUNT` | unset | Number of tasks scheduled for the future |
 | `MASS_INSERT_DELAY_MS` | `0` | Delay between batches (ms) |
-| `JOB_RUNR_WORKER_COUNT` | `4` | Number of JobRunr workers |
+| `JOB_RUNR_WORKER_COUNT` | `10` | Number of JobRunr workers |
 | `DB_SCHEDULER_THREADS` | `10` | Number of db-scheduler threads |
+| `POLL_INTERVAL_IN_SECONDS` | `5` | Scheduler polling interval for both libraries |
+| `POLL_USING_LOCK_AND_FETCH_LOCK_AT_MOST_FOR` | `0.5` | db-scheduler lock-and-fetch lock duration factor |
+| `POLL_USING_LOCK_AND_FETCH_LOCK_AT_MOST_FOR_SECONDS` | `3.0` | db-scheduler lock-and-fetch maximum lock duration (seconds) |
 | `JVM_ARGS` | `-Xms256m -Xmx512m -XX:+UseG1GC` | JVM memory and GC settings |
 
 ### Mass Insert Parameters
@@ -237,7 +241,7 @@ All applications use identical settings for fair comparison:
 | `mass.insert.count` | `1000` | Total number of tasks |
 | `mass.insert.batch-size` | `1000` | Batch size |
 | `mass.insert.delayMs` | `0` | Delay between batches (ms) |
-| `jobrunr.worker-count` | `4` | Number of JobRunr workers |
+| `jobrunr.worker-count` | `10` | Number of JobRunr workers |
 | `db-scheduler.threads` | `10` | Number of db-scheduler threads |
 
 ### Configuration Files

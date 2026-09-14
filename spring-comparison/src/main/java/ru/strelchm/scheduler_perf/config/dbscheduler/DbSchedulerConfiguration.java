@@ -6,18 +6,20 @@ import com.github.kagkarlsson.scheduler.event.SchedulerListener;
 import com.github.kagkarlsson.scheduler.jdbc.JdbcCustomization;
 import com.github.kagkarlsson.scheduler.jdbc.PostgreSqlJdbcCustomization;
 import com.github.kagkarlsson.scheduler.serializer.Serializer;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import ru.strelchm.scheduler_perf.core.dbscheduler.MdcSchedulerListener;
+import ru.strelchm.scheduler_perf.core.dbscheduler.MicrometerSchedulerListener;
 
 import java.util.Optional;
 
 @Slf4j
 @Configuration
-@Profile("db-scheduler")
+@Profile({"db-scheduler", "db-scheduler-generic"})
 public class DbSchedulerConfiguration {
 
     @Bean
@@ -40,5 +42,10 @@ public class DbSchedulerConfiguration {
     @Bean
     SchedulerListener mdcSchedulerListener() {
         return new MdcSchedulerListener();
+    }
+
+    @Bean
+    SchedulerListener micrometerSchedulerListener(MeterRegistry meterRegistry) {
+        return new MicrometerSchedulerListener(meterRegistry);
     }
 }

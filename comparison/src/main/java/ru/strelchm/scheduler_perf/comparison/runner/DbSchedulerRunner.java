@@ -17,7 +17,7 @@ import com.github.kagkarlsson.scheduler.task.schedule.Schedule;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.strelchm.scheduler_perf.comparison.AppConfig;
+import ru.strelchm.scheduler_perf.comparison.config.AppConfig;
 import ru.strelchm.scheduler_perf.core.dbscheduler.MdcSchedulerListener;
 import ru.strelchm.scheduler_perf.core.dbscheduler.MicrometerSchedulerListener;
 
@@ -35,8 +35,10 @@ public class DbSchedulerRunner implements SchedulerRunner {
     private final AppConfig config;
     private final List<Task<?>> knownTasks;
 
+    private Scheduler scheduler;
+
     @Override
-    public void run() {
+    public void initialize() {
         boolean genericLockAndFetch = config.getSchedulerType() == AppConfig.SchedulerType.DB_SCHEDULLER_GENERIC;
         int pollIntervalInSeconds = config.getPollIntervalInSeconds();
 
@@ -46,9 +48,12 @@ public class DbSchedulerRunner implements SchedulerRunner {
                 (genericLockAndFetch ? "generic" : "single statement")
         );
 
-        Scheduler scheduler = Scheduler.create(dataSource, knownTasks)
+        scheduler = Scheduler.create(dataSource, knownTasks)
                 .pollingInterval(Duration.ofSeconds(pollIntervalInSeconds))
-                .pollUsingLockAndFetch(0.5, 3.0) // todo config
+            .pollUsingLockAndFetch(
+                config.getPollUsingLockAndFetchLockAtMostFor(),
+                config.getPollUsingLockAndFetchLockAtMostForSeconds()
+            )
                 .serializer(new JacksonSerializer(getObjectMapper()))
                 .addSchedulerListener(new MicrometerSchedulerListener(meterRegistry))
                 .addSchedulerListener(new MdcSchedulerListener())
@@ -56,6 +61,10 @@ public class DbSchedulerRunner implements SchedulerRunner {
                 .threads(config.getDbSchedulerThreads())
                 .jdbcCustomization(new PostgreSqlJdbcCustomization(genericLockAndFetch, false))
                 .build();
+    }
+
+    @Override
+    public void startBackgroundServer() {
         scheduler.start();
     }
 

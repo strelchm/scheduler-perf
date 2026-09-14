@@ -1,4 +1,4 @@
-package ru.strelchm.scheduler_perf.comparison;
+package ru.strelchm.scheduler_perf.comparison.config;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -17,6 +17,9 @@ public class AppConfig {
     private int jobrunrWorkerCount;
     private int dbSchedulerThreads;
     private int pollIntervalInSeconds;
+    private double pollUsingLockAndFetchLockAtMostFor;
+    private double pollUsingLockAndFetchLockAtMostForSeconds;
+    private Integer sleepingJobsCount;
 
     private String dbUrl;
     private String dbUsername;
@@ -49,6 +52,7 @@ public class AppConfig {
     private void fillSchedulerPropsFromEnvironment() {
         final String envMassInsertEnabled = System.getenv("MASS_INSERT_ENABLED");
         final String envCount = System.getenv("MASS_INSERT_COUNT");
+        final String envSleepingCount = System.getenv("MASS_INSERT_SLEEPING_COUNT");
         final String envBatchSize = System.getenv("MASS_INSERT_BATCH_SIZE");
         final String envDelayMs = System.getenv("MASS_INSERT_DELAY_MS");
 
@@ -60,11 +64,16 @@ public class AppConfig {
         final String envJobrunrWorkerCount = System.getenv("JOB_RUNR_WORKER_COUNT");
         final String envDbSchedulerThreads = System.getenv("DB_SCHEDULER_THREADS");
         final String envPollIntervalInSeconds = System.getenv("POLL_INTERVAL_IN_SECONDS");
+        final String envPollUsingLockAndFetchLockAtMostFor = System.getenv("POLL_USING_LOCK_AND_FETCH_LOCK_AT_MOST_FOR");
+        final String envPollUsingLockAndFetchLockAtMostForSeconds = System.getenv("POLL_USING_LOCK_AND_FETCH_LOCK_AT_MOST_FOR_SECONDS");
         log.info("config {}, {}, {}", envJobrunrWorkerCount, envDbSchedulerThreads, envPollIntervalInSeconds);
 
         jobrunrWorkerCount = Integer.parseInt(envJobrunrWorkerCount);
         dbSchedulerThreads = Integer.parseInt(envDbSchedulerThreads);
         pollIntervalInSeconds = Integer.parseInt(envPollIntervalInSeconds);
+        pollUsingLockAndFetchLockAtMostFor = Double.parseDouble(envPollUsingLockAndFetchLockAtMostFor);
+        pollUsingLockAndFetchLockAtMostForSeconds = Double.parseDouble(envPollUsingLockAndFetchLockAtMostForSeconds);
+        sleepingJobsCount = envSleepingCount == null || envSleepingCount.isEmpty() ? null : Integer.parseInt(envSleepingCount);
     }
 
     public enum SchedulerType {

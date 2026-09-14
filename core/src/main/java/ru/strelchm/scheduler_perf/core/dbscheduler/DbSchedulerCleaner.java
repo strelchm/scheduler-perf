@@ -18,7 +18,7 @@ public class DbSchedulerCleaner implements DbCleaner {
     public void cleanOldJobs() {
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
-            if (!TableExistenceChecker.tableExists(conn, "jobrunr_jobs")) {
+            if (!TableExistenceChecker.tableExists(conn, "scheduled_tasks")) {
                 log.info("Skip truncating tables cause db does not contain them");
                 return;
             }

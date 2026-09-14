@@ -16,11 +16,14 @@ services:
     restart: always
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_SCHEDULER_TYPE:-db-scheduler-generic}
+      - MASS_INSERT_ENABLED=${MASS_INSERT_ENABLED:-true}
       - MASS_INSERT_COUNT=${MASS_INSERT_COUNT:-1000}
+      - MASS_INSERT_SLEEPING_COUNT=${MASS_INSERT_SLEEPING_COUNT}
       - MASS_INSERT_BATCH_SIZE=${MASS_INSERT_BATCH_SIZE:-1000}
       - MASS_INSERT_DELAY_MS=${MASS_INSERT_DELAY_MS:-0}
-      - JOB_RUNR_WORKER_COUNT=${JOB_RUNR_WORKER_COUNT:-4}
+      - JOB_RUNR_WORKER_COUNT=${JOB_RUNR_WORKER_COUNT:-10}
       - DB_SCHEDULER_THREADS=${DB_SCHEDULER_THREADS:-10}
+      - POLL_INTERVAL_IN_SECONDS=${POLL_INTERVAL_IN_SECONDS:-5}
       - JVM_ARGS=-Xms256m -Xmx512m -XX:+UseG1GC
     deploy:
       resources:
@@ -30,6 +33,8 @@ services:
         reservations:
           cpus: '1.0'
           memory: 512M
+    cpus: 2.0
+    mem_limit: 768m
     networks:
       - scheduler-net
 
