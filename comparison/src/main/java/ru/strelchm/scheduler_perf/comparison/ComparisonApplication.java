@@ -4,6 +4,12 @@ import com.github.kagkarlsson.scheduler.task.helper.OneTimeTask;
 import com.github.kagkarlsson.scheduler.task.helper.Tasks;
 import io.micrometer.prometheusmetrics.PrometheusConfig;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import lombok.extern.slf4j.Slf4j;
 import ru.strelchm.scheduler_perf.comparison.config.AppConfig;
 import ru.strelchm.scheduler_perf.comparison.config.AppConfig.SchedulerType;
@@ -21,6 +27,7 @@ import ru.strelchm.scheduler_perf.core.service.NoOpDto;
 import ru.strelchm.scheduler_perf.core.service.NoOpService;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -45,6 +52,7 @@ public class ComparisonApplication {
 
         NoOpService noopService = new NoOpService();
 
+        runLiquibaseMigrations(dataSource, config.getSchedulerType());
         cleanJobs(config.getSchedulerType(), dataSource);
         SchedulerRunner runner = getSchedulerRunner(config, dataSource, meterRegistry, noopService);
         runner.initialize();
@@ -52,6 +60,32 @@ public class ComparisonApplication {
         runner.startBackgroundServer();
 
         new CountDownLatch(1).await();
+    }
+
+    private static void runLiquibaseMigrations(DataSource dataSource, SchedulerType schedulerType) throws LiquibaseException {
+        String changeLog = switch (schedulerType) {
+            case DB_SCHEDULLER, DB_SCHEDULLER_GENERIC -> "db/changelog/db-scheduler/db.changelog-master.xml";
+            case JOB_RUNR -> "db/changelog/jobrunr/db.changelog-master.xml";
+        };
+
+        try (Connection connection = dataSource.getConnection()) {
+            Database database = DatabaseFactory.getInstance()
+                    .findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            database.setDatabaseChangeLogTableName(switch (schedulerType) {
+                case DB_SCHEDULLER, DB_SCHEDULLER_GENERIC -> "db_scheduler_change_log";
+                case JOB_RUNR -> "jobrunr_change_log";
+            });
+            database.setDatabaseChangeLogLockTableName(switch (schedulerType) {
+                case DB_SCHEDULLER, DB_SCHEDULLER_GENERIC -> "db_scheduler_change_log_lock";
+                case JOB_RUNR -> "jobrunr_change_log_lock";
+            });
+
+            try (Liquibase liquibase = new Liquibase(changeLog, new ClassLoaderResourceAccessor(), database)) {
+                liquibase.update();
+            }
+        } catch (Exception e) {
+            throw new LiquibaseException("Failed to apply database migrations for scheduler type " + schedulerType, e);
+        }
     }
 
     private static void cleanJobs(SchedulerType schedulerType, DataSource dataSource) {
